@@ -4,6 +4,10 @@ The "[src](./src/)" directory contains a collection of self-documented PowerShel
 
 ## Pre-Requisites
 
+- An AWS account
+- PowerShell 7 for running same commands on Linux, MacOS and Windows.
+- aws CLI
+- AWS Tools for PowerShell 
 - [AWS Tools for PowerShell](https://docs.aws.amazon.com/powershell/latest/userguide/pstools-getting-set-up-windows.html)
 
 ### Usage
