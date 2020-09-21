@@ -1,9 +1,11 @@
 <#
-Creates Kubernetes ServiceAccount tied to IAM permissions required to run
-Envoy pod on EKS Fargate nodes. 
+To run, execute following PowerShell commands:
 
 curl -o $env:TMP/SvcAccount-for-envoy-on-eks-fargate.ps1 https://raw.githubusercontent.com/vgribok/AWS-PowerShell-Shortcuts/master/src/SvcAccount-for-envoy-on-eks-fargate.ps1
 . $env:TMP/SvcAccount-for-envoy-on-eks-fargate.ps1
+
+Creates Kubernetes ServiceAccount tied to IAM permissions required to run
+Envoy pod on EKS Fargate nodes. 
 
 This ServiceAccount needs to be used for Pods running in App Mesh on EKS Fargate nodes, 
 which also includes Ingress Gateway Envoy contaiers and not only Envoy sidecar 
@@ -46,7 +48,7 @@ $eksCluster = $null
 $eksCluster = Get-EKSCluster -Name $ClusterName -Region $RegionName
 
 if(!$eksCluster) {
-    Write-Host "Valid cluster name must be specified. Cluster `"$ClusterName`" was not foundin the `"$RegionName`" region. Here is the list of existing clusters:`n$(Get-EKSClusterList -Region $RegionName)"
+    Write-Host "Valid cluster name must be specified. Cluster `"$ClusterName`" was not found in the `"$RegionName`" region. Here is the list of existing clusters:`n$(Get-EKSClusterList -Region $RegionName)"
     return
 }
 

@@ -1,10 +1,11 @@
 <#
-Installs AWS ALB Ingress controller on an EKS Kubernetes cluster.
-
 To run, execute following PowerShell commands: 
 
 curl -o $env:TMP/ALB-ingress-controller-installer.ps1 https://raw.githubusercontent.com/vgribok/AWS-PowerShell-Shortcuts/master/src/ALB-ingress-controller-installer.ps1
 . $env:TMP/ALB-ingress-controller-installer.ps1
+
+Installs AWS ALB Ingress controller on an existing EKS Kubernetes cluster. 
+This single script Combines multiple steps from https://docs.aws.amazon.com/eks/latest/userguide/alb-ingress.html.
 
 Pre-requisites:
 - An AWS Account
@@ -33,7 +34,7 @@ $eksCluster = $null
 $eksCluster = Get-EKSCluster -Name $ClusterName -Region $RegionName
 
 if(!$eksCluster) {
-    Write-Host "Valid cluster name must be specified. Cluster `"$ClusterName`" was not foundin the `"$RegionName`" region. Here is the list of existing clusters:`n$(Get-EKSClusterList -Region $RegionName)"
+    Write-Host "Valid cluster name must be specified. Cluster `"$ClusterName`" was not found in the `"$RegionName`" region. Here is the list of existing clusters:`n$(Get-EKSClusterList -Region $RegionName)"
     return
 }
 

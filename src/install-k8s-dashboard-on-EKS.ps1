@@ -1,10 +1,11 @@
 <#
-Installs Kubernetes Dashboard on AWS EKS cluster. Supports Fargate.
-
 To run, execute following PowerShell commands:
 
 curl -o $env:TMP/install-k8s-dashboard-on-EKS.ps1 https://raw.githubusercontent.com/vgribok/AWS-PowerShell-Shortcuts/master/src/install-k8s-dashboard-on-EKS.ps1
 . $env:TMP/install-k8s-dashboard-on-EKS.ps1
+
+Installs and launches Kubernetes Dashboard on an existing AWS EKS cluster. Supports Fargate.
+This single script Combines multiple steps from https://docs.aws.amazon.com/eks/latest/userguide/dashboard-tutorial.html.
 
 Pre-requisites:
 - An AWS Account

@@ -1,12 +1,12 @@
 <#
-Opens K8s Dashboard installed on EKS with `kubectl proxy`, 
-and copies authentication token to the clipboard for the easy of login.
-Assumes current kubectl cluster is where the dashboard is.
-
 To run, execute following PowerShell commands:
 
 curl -o $env:TMP/open-K8s-dashbord-locally.ps1 https://raw.githubusercontent.com/vgribok/AWS-PowerShell-Shortcuts/master/src/open-K8s-dashbord-locally.ps1
 . $env:TMP/open-K8s-dashbord-locally.ps1
+
+Opens K8s Dashboard installed on EKS with `kubectl proxy`, 
+and copies authentication token to the clipboard for the ease of login.
+Assumes current kubectl cluster is where the dashboard is.
 
 Pre-requisites:
 - kubectl CLI

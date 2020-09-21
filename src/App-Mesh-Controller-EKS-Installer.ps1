@@ -1,11 +1,11 @@
 <#
-Adds AWS App Mesh CRDs to an EKS Kubernetes cluster
-and installs App Mesh Controller.
-
 To run, execute following PowerShell commands:
 
 curl -o $env:TMP/App-Mesh-Controller-EKS-Installer.ps1 https://raw.githubusercontent.com/vgribok/AWS-PowerShell-Shortcuts/master/src/App-Mesh-Controller-EKS-Installer.ps1
 . $env:TMP/App-Mesh-Controller-EKS-Installer.ps1
+
+Adds AWS App Mesh CRDs to an existing EKS Kubernetes cluster and installs App Mesh Controller.
+This single script Combines multiple steps from https://docs.aws.amazon.com/app-mesh/latest/userguide/mesh-k8s-integration.html
 
 Pre-requisites:
 - An AWS Account
@@ -20,7 +20,7 @@ Pre-requisites:
 [CmdletBinding()]
 param (
     [Parameter(mandatory=$true)] [object] ${Enter "fargate" if the cluster is Fargate-enabled and you would like to install App Mesh Controller on EKS Fargate nodes. Hit Enter otherwise},
-    [Parameter()] [string] $Tracing = "x-ray"
+    [Parameter()] [string] $Tracing = "x-ray" # turns on AWS X-Ray tracing for the Mesh
 )
 
 [string] $IsFargate = ${Enter "fargate" if the cluster is Fargate-enabled and you would like to install App Mesh Controller on EKS Fargate nodes. Hit Enter otherwise}
@@ -41,7 +41,7 @@ $eksCluster = $null
 $eksCluster = Get-EKSCluster -Name $ClusterName -Region $RegionName
 
 if(!$eksCluster) {
-    Write-Host "Valid cluster name must be specified. Cluster `"$ClusterName`" was not foundin the `"$RegionName`" region. Here is the list of existing clusters:`n$(Get-EKSClusterList -Region $RegionName)"
+    Write-Host "Valid cluster name must be specified. Cluster `"$ClusterName`" was not found in the `"$RegionName`" region. Here is the list of existing clusters:`n$(Get-EKSClusterList -Region $RegionName)"
     return
 }
 
