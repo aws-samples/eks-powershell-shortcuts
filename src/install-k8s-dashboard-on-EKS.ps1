@@ -17,16 +17,19 @@ Pre-requisites:
 
 [CmdletBinding()]
 param (
-    [Parameter(mandatory=$true)] [string] ${Enter existing cluster name, one of returned by Get-EKSClusterList command},
     [Parameter(mandatory=$true)] [string] ${Enter latest metrics server version found at github.com/kubernetes-sigs/metrics-server/releases/},
     [Parameter(mandatory=$true)] [string] ${Enter latest Dashboard version found at github.com/kubernetes/dashboard/blob/master/README.md#install},
-    [Parameter(mandatory=$true)] [string] ${Enter "fargate" if the cluster is Fargate-enabled and you would like to install the Dashboard on Fargate. Hit Enter otherwise}
+    [Parameter(mandatory=$true)] [object] ${Enter "fargate" if the cluster is Fargate-enabled and you would like to install the Dashboard on Fargate. Hit Enter otherwise}
 )
 
-[string] $ClusterName = ${Enter existing cluster name, one of returned by Get-EKSClusterList command}
 [string] $MetricsServerVersion = ${Enter latest metrics server version found at github.com/kubernetes-sigs/metrics-server/releases/}
 [string] $DashboardVersion = ${Enter latest Dashboard version found at github.com/kubernetes/dashboard/blob/master/README.md#install}
 [string] $IsFargate = ${Enter "fargate" if the cluster is Fargate-enabled and you would like to install the Dashboard on Fargate. Hit Enter otherwise}
+
+if($IsFargate -and ($IsFargate.ToLowerInvariant() -ne "fargate")) {
+    Write-Host "Parameter `"IsFargate`" has invalid value of `"$IsFargate`. It must be either `"fargate`" or blank."
+    return
+}
 
 if(!$MetricsServerVersion.StartsWith("v")) {
     $MetricsServerVersion = "v" + $MetricsServerVersion
@@ -35,30 +38,29 @@ if(!$DashboardVersion.StartsWith("v")) {
     $DashboardVersion = "v" + $DashboardVersion
 }
 
+$context = (kubectl config view --minify -o json | ConvertFrom-Json).contexts.context.cluster.Split(".")
+
+[string] $ClusterName = $context[0]
+[string] $RegionName = $context[1]
+
 Import-Module AWSPowerShell.NetCore
 
 $eksCluster = $null
-$eksCluster = Get-EKSCluster $ClusterName
+$eksCluster = Get-EKSCluster -Name $ClusterName -Region $RegionName
 
 if(!$eksCluster) {
-    Write-Host "Valid cluster name must be specified. Cluster `"$ClusterName`" was not found. Here is the list of existing clusters:`n$(Get-EKSClusterList)"
+    Write-Host "Valid cluster name must be specified. Cluster `"$ClusterName`" was not found in the `"$RegionName`" region. Here is the list of existing clusters:`n$(Get-EKSClusterList -Region $RegionName)"
     return
 }
-
-#$eksCluster
-
-# Switch kubectl profile to the cluster
-$region = $eksCluster.Arn.Split(":")[3]
-aws eks --region $region update-kubeconfig --name $ClusterName --alias $region/$ClusterName
 
 # Deploy Metrics Server
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/$MetricsServerVersion/components.yaml
 Write-Host "Waiting for Metrics Server Pods ready state..."
 kubectl wait -n kube-system --for=condition=available --timeout=180s --all deployments
 
-if($IsFargate.ToLowerInvariant() -eq "fargate") {
+if($IsFargate) {
     # Create Fargate profile for “kubernetes-dashboard” namespace:
-    eksctl create fargateprofile --cluster $ClusterName --name kubernetes-dashboard-ns --namespace kubernetes-dashboard
+    eksctl create fargateprofile --cluster $ClusterName --region $RegionName --name kubernetes-dashboard-ns --namespace kubernetes-dashboard
 }
 
 # Deploy the Dashboard

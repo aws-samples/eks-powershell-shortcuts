@@ -17,20 +17,23 @@ Pre-requisites:
 
 [CmdletBinding()]
 param (
-    [Parameter(mandatory=$true)] [string] ${Enter existing cluster name, one of returned by Get-EKSClusterList command},
     [Parameter(mandatory=$true)] [string] ${Enter latest version from github.com/kubernetes-sigs/aws-alb-ingress-controller/releases}
 )
 
-[string] $ClusterName = ${Enter existing cluster name, one of returned by Get-EKSClusterList command}
 [string] $AlbIngressControllerVersion = ${Enter latest version from github.com/kubernetes-sigs/aws-alb-ingress-controller/releases}
+
+$context = (kubectl config view --minify -o json | ConvertFrom-Json).contexts.context.cluster.Split(".")
+
+[string] $ClusterName = $context[0]
+[string] $RegionName = $context[1]
 
 Import-Module AWSPowerShell.NetCore
 
 $eksCluster = $null
-$eksCluster = Get-EKSCluster $ClusterName
+$eksCluster = Get-EKSCluster -Name $ClusterName -Region $RegionName
 
 if(!$eksCluster) {
-    Write-Host "Valid cluster name must be specified. Cluster `"$ClusterName`" was not found. Here is the list of existing clusters:`n$(Get-EKSClusterList)"
+    Write-Host "Valid cluster name must be specified. Cluster `"$ClusterName`" was not foundin the `"$RegionName`" region. Here is the list of existing clusters:`n$(Get-EKSClusterList -Region $RegionName)"
     return
 }
 
@@ -50,13 +53,8 @@ try {
     curl -o iam-policy.json https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/$ALB_INGRESS_CONT_VER/docs/examples/iam-policy.json
     aws iam create-policy --policy-name ALBIngressControllerIAMPolicy --policy-document file://iam-policy.json
 
-    # Switch kubectl profile to the cluster
-    $CLUSTER = $ClusterName
-    $REGION = $eksCluster.Arn.Split(":")[3]
-    aws eks --region $REGION update-kubeconfig --name $CLUSTER --alias $REGION/$CLUSTER
-
     # Install IAM-Kubernetes OpenID integration
-    eksctl utils associate-iam-oidc-provider --region $REGION --cluster $CLUSTER --approve
+    eksctl utils associate-iam-oidc-provider --region $RegionName --cluster $ClusterName --approve
 
     # Create K8s RBAC Role for ALB Ingress Controller
     kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/$ALB_INGRESS_CONT_VER/docs/examples/rbac-role.yaml
@@ -67,10 +65,10 @@ try {
     Write-Host "Policy ARN: $AlbPolicyArn"
 
     eksctl create iamserviceaccount `
-        --region $REGION `
+        --region $RegionName `
         --name alb-ingress-controller `
         --namespace kube-system `
-        --cluster $CLUSTER `
+        --cluster $ClusterName `
         --attach-policy-arn $AlbPolicyArn `
         --override-existing-serviceaccounts `
         --approve
@@ -79,9 +77,9 @@ try {
     curl -o alb-ingress-controller.yaml https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/$ALB_INGRESS_CONT_VER/docs/examples/alb-ingress-controller.yaml
     # Update ALB Ingress Controller K8s Manifest file “alb-ingress-controller.yaml”
     (cat alb-ingress-controller.yaml) `
-        -replace "# - --cluster-name=devCluster", "- --cluster-name=$CLUSTER" `
+        -replace "# - --cluster-name=devCluster", "- --cluster-name=$ClusterName" `
         -replace "# - --aws-vpc-id=vpc-xxxxxx", "- --aws-vpc-id=$($eksCluster.ResourcesVpcConfig.VpcId)" `
-        -replace "# - --aws-region=us-west-1", "- --aws-region=$REGION" `
+        -replace "# - --aws-region=us-west-1", "- --aws-region=$RegionName" `
         | Out-File alb-ingress-controller.yaml
 
     # Install ALB Ingress Controller
