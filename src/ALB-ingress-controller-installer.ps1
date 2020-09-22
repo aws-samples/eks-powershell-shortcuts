@@ -18,15 +18,17 @@ Pre-requisites:
 
 [CmdletBinding()]
 param (
+    [Parameter(mandatory=$true)] [string] ${Enter EKS Cluster Name},
+    [Parameter()] [string] $RegionName,
     [Parameter(mandatory=$true)] [string] ${Enter latest version from github.com/kubernetes-sigs/aws-alb-ingress-controller/releases}
 )
 
+if(!$RegionName) {
+    $RegionName = (aws configure get region)
+}
+
 [string] $AlbIngressControllerVersion = ${Enter latest version from github.com/kubernetes-sigs/aws-alb-ingress-controller/releases}
-
-$context = (kubectl config view --minify -o json | ConvertFrom-Json).contexts.context.cluster.Split(".")
-
-[string] $ClusterName = $context[0]
-[string] $RegionName = $context[1]
+[string] $ClusterName = ${Enter EKS Cluster Name}
 
 Import-Module AWSPowerShell.NetCore
 
