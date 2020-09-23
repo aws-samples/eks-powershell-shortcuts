@@ -6,7 +6,7 @@ curl -o $env:TMP/open-K8s-dashbord-locally.ps1 https://raw.githubusercontent.com
 
 Opens K8s Dashboard installed on EKS with `kubectl proxy`, 
 and copies authentication token to the clipboard for the ease of login.
-Assumes current kubectl cluster is where the dashboard is.
+Assumes current kubectl context is pointing to where the dashboard is installed.
 
 Pre-requisites:
 - kubectl CLI

@@ -25,22 +25,17 @@ Pre-requisites:
 
 [CmdletBinding()]
 param (
-    [Parameter()] [string] $NamespaceName,
+    [Parameter(mandatory=$true)] [string] ${Enter EKS Cluster Name},
+    [Parameter()] [string] $RegionName,
+    [Parameter(mandatory=$true)] [string] ${Please enter Fargate namespace for the ServiceAccount},
     [Parameter()] [string] $fargatePodAccountName="envoy-fargate-pod-svcaccount"
 )
 
-$context = (kubectl config view --minify -o json | ConvertFrom-Json).contexts.context
-
-[string] $ClusterName = $context.cluster.Split(".")[0]
-[string] $RegionName = $context.cluster.Split(".")[1]
-
-if(!$NamespaceName) {
-    $NamespaceName = $context.namespace
+if(!$RegionName) {
+    $RegionName = (aws configure get region)
 }
-if(!$NamespaceName) {
-    Write-Host "Valid Kubernetes namespace name needs to be set either as current or passed as a parameter"
-    return
-}
+[string] $ClusterName = ${Enter EKS Cluster Name}
+[string] $NamespaceName = ${Please enter Fargate namespace for the ServiceAccount}
 
 Import-Module AWSPowerShell.NetCore
 

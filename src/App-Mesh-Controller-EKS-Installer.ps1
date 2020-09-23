@@ -19,9 +19,15 @@ Pre-requisites:
 
 [CmdletBinding()]
 param (
+    [Parameter(mandatory=$true)] [string] ${Enter EKS Cluster Name},
+    [Parameter()] [string] $RegionName,
     [Parameter(mandatory=$true)] [object] ${Enter "fargate" if the cluster is Fargate-enabled and you would like to install App Mesh Controller on EKS Fargate nodes. Hit Enter otherwise},
     [Parameter()] [string] $Tracing = "x-ray" # turns on AWS X-Ray tracing for the Mesh
 )
+if(!$RegionName) {
+    $RegionName = (aws configure get region)
+}
+[string] $ClusterName = ${Enter EKS Cluster Name}
 
 [string] $IsFargate = ${Enter "fargate" if the cluster is Fargate-enabled and you would like to install App Mesh Controller on EKS Fargate nodes. Hit Enter otherwise}
 
@@ -29,11 +35,6 @@ if($IsFargate -and ($IsFargate.ToLowerInvariant() -ne "fargate")) {
     Write-Host "Parameter `"IsFargate`" has invalid value of `"$IsFargate`. It must be either `"fargate`" or blank."
     return
 }
-
-$context = (kubectl config view --minify -o json | ConvertFrom-Json).contexts.context.cluster.Split(".")
-
-[string] $ClusterName = $context[0]
-[string] $RegionName = $context[1]
 
 Import-Module AWSPowerShell.NetCore
 
@@ -44,6 +45,9 @@ if(!$eksCluster) {
     Write-Host "Valid cluster name must be specified. Cluster `"$ClusterName`" was not found in the `"$RegionName`" region. Here is the list of existing clusters:`n$(Get-EKSClusterList -Region $RegionName)"
     return
 }
+
+# Set current kubectl context
+aws eks --region $RegionName update-kubeconfig --name $ClusterName --alias $RegionName/$ClusterName
 
 # Install the App Mesh Kubernetes custom resource definitions (CRD).
 kubectl apply -k "https://github.com/aws/eks-charts/stable/appmesh-controller/crds?ref=master"

@@ -26,9 +26,9 @@ param (
 if(!$RegionName) {
     $RegionName = (aws configure get region)
 }
+[string] $ClusterName = ${Enter EKS Cluster Name}
 
 [string] $AlbIngressControllerVersion = ${Enter latest version from github.com/kubernetes-sigs/aws-alb-ingress-controller/releases}
-[string] $ClusterName = ${Enter EKS Cluster Name}
 
 Import-Module AWSPowerShell.NetCore
 
@@ -39,6 +39,9 @@ if(!$eksCluster) {
     Write-Host "Valid cluster name must be specified. Cluster `"$ClusterName`" was not found in the `"$RegionName`" region. Here is the list of existing clusters:`n$(Get-EKSClusterList -Region $RegionName)"
     return
 }
+
+# Set current kubectl context
+aws eks --region $RegionName update-kubeconfig --name $ClusterName --alias $RegionName/$ClusterName
 
 if(!$AlbIngressControllerVersion.StartsWith("v")) {
     $AlbIngressControllerVersion = "v"+$AlbIngressControllerVersion

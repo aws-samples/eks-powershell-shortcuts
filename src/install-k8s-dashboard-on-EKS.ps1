@@ -18,10 +18,16 @@ Pre-requisites:
 
 [CmdletBinding()]
 param (
+    [Parameter(mandatory=$true)] [string] ${Enter EKS Cluster Name},
+    [Parameter()] [string] $RegionName,
     [Parameter(mandatory=$true)] [string] ${Enter latest metrics server version found at github.com/kubernetes-sigs/metrics-server/releases/},
     [Parameter(mandatory=$true)] [string] ${Enter latest Dashboard version found at github.com/kubernetes/dashboard/blob/master/README.md#install},
     [Parameter(mandatory=$true)] [object] ${Enter "fargate" if the cluster is Fargate-enabled and you would like to install the Dashboard on Fargate. Hit Enter otherwise}
 )
+if(!$RegionName) {
+    $RegionName = (aws configure get region)
+}
+[string] $ClusterName = ${Enter EKS Cluster Name}
 
 [string] $MetricsServerVersion = ${Enter latest metrics server version found at github.com/kubernetes-sigs/metrics-server/releases/}
 [string] $DashboardVersion = ${Enter latest Dashboard version found at github.com/kubernetes/dashboard/blob/master/README.md#install}
@@ -39,11 +45,6 @@ if(!$DashboardVersion.StartsWith("v")) {
     $DashboardVersion = "v" + $DashboardVersion
 }
 
-$context = (kubectl config view --minify -o json | ConvertFrom-Json).contexts.context.cluster.Split(".")
-
-[string] $ClusterName = $context[0]
-[string] $RegionName = $context[1]
-
 Import-Module AWSPowerShell.NetCore
 
 $eksCluster = $null
@@ -53,6 +54,9 @@ if(!$eksCluster) {
     Write-Host "Valid cluster name must be specified. Cluster `"$ClusterName`" was not found in the `"$RegionName`" region. Here is the list of existing clusters:`n$(Get-EKSClusterList -Region $RegionName)"
     return
 }
+
+# Set current kubectl context
+aws eks --region $RegionName update-kubeconfig --name $ClusterName --alias $RegionName/$ClusterName
 
 # Deploy Metrics Server
 kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/download/$MetricsServerVersion/components.yaml
