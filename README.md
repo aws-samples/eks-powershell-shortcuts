@@ -14,7 +14,7 @@ The "[src](./src/)" directory contains a collection of self-documented PowerShel
 No need to clone this repo to use scripts. Each script header comment section has a PowerShell command that will run the script. Simply copy and pasted it into PowerShell and run. 
 
 ## Security
-See [CONTRIBUTING]() for more information.
+See [CONTRIBUTING](./CONTRIBUTING.md) for more information.
 
 ## License
 This library is licensed under the MIT-0 License. See the [LICENSE](./LICENSE) file.
