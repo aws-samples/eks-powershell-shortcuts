@@ -1,7 +1,7 @@
 <#
 To run, execute following PowerShell commands:
 
-curl -o $env:TMP/open-K8s-dashbord-locally.ps1 https://raw.githubusercontent.com/vgribok/AWS-PowerShell-Shortcuts/master/src/open-K8s-dashbord-locally.ps1
+curl -o $env:TMP/open-K8s-dashbord-locally.ps1 https://raw.githubusercontent.com/aws-samples/eks-powershell-shortcuts/main/src/open-K8s-dashbord-locally.ps1
 . $env:TMP/open-K8s-dashbord-locally.ps1
 
 Opens K8s Dashboard installed on EKS with `kubectl proxy`, 

@@ -1,7 +1,7 @@
 <#
 To run, execute following PowerShell commands:
 
-curl -o $env:TMP/App-Mesh-Controller-EKS-Installer.ps1 https://raw.githubusercontent.com/vgribok/AWS-PowerShell-Shortcuts/master/src/App-Mesh-Controller-EKS-Installer.ps1
+curl -o $env:TMP/App-Mesh-Controller-EKS-Installer.ps1 https://raw.githubusercontent.com/aws-samples/eks-powershell-shortcuts/main/src/App-Mesh-Controller-EKS-Installer.ps1
 . $env:TMP/App-Mesh-Controller-EKS-Installer.ps1
 
 Adds AWS App Mesh CRDs to an existing EKS Kubernetes cluster and installs App Mesh Controller.

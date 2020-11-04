@@ -1,7 +1,7 @@
 <#
 To run, execute following PowerShell commands:
 
-curl -o $env:TMP/SvcAccount-for-envoy-on-eks-fargate.ps1 https://raw.githubusercontent.com/vgribok/AWS-PowerShell-Shortcuts/master/src/SvcAccount-for-envoy-on-eks-fargate.ps1
+curl -o $env:TMP/SvcAccount-for-envoy-on-eks-fargate.ps1 https://raw.githubusercontent.com/aws-samples/eks-powershell-shortcuts/main/src/SvcAccount-for-envoy-on-eks-fargate.ps1
 . $env:TMP/SvcAccount-for-envoy-on-eks-fargate.ps1
 
 Creates Kubernetes ServiceAccount tied to IAM permissions required to run

@@ -1,7 +1,7 @@
 <#
 To use run next two lines in PowerShell:
 
-curl -o $env:TMP/AwsPsPrompt.ps1 https://raw.githubusercontent.com/vgribok/AWS-PowerShell-Shortcuts/master/src/AwsPsPrompt.ps1
+curl -o $env:TMP/AwsPsPrompt.ps1 https://raw.githubusercontent.com/aws-samples/eks-powershell-shortcuts/main/src/AwsPsPrompt.ps1
 . $env:TMP/AwsPsPrompt.ps1
 
 Requires AWS Tools for PowerShell to be installed: https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/

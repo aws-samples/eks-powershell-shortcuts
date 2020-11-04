@@ -1,7 +1,7 @@
 <#
 To run, execute following PowerShell commands: 
 
-curl -o $env:TMP/ALB-ingress-controller-installer.ps1 https://raw.githubusercontent.com/vgribok/AWS-PowerShell-Shortcuts/master/src/ALB-ingress-controller-installer.ps1
+curl -o $env:TMP/ALB-ingress-controller-installer.ps1 https://raw.githubusercontent.com/aws-samples/eks-powershell-shortcuts/main/src/ALB-ingress-controller-installer.ps1
 . $env:TMP/ALB-ingress-controller-installer.ps1
 
 Installs AWS ALB Ingress controller on an existing EKS Kubernetes cluster. 
