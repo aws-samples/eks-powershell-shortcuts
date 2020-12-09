@@ -41,13 +41,48 @@ if(!$eksCluster) {
 # Set current kubectl context
 aws eks --region $RegionName update-kubeconfig --name $ClusterName --alias $RegionName/$ClusterName
 
-# Install IAM-Kubernetes OpenID integration
-eksctl utils associate-iam-oidc-provider --region $RegionName --cluster $ClusterName --approve
+# Create temporary directory for text files
+Push-Location
+mkdir $env:TMP/alb-ingress-controller-temp-files -Force | cd
 
-helm upgrade -i -n kube-system aws-load-balancer-controller eks/aws-load-balancer-controller `
-    --set clusterName=$CLUSTER `
+try {
+    # Install IAM-Kubernetes OpenID integration
+    eksctl utils associate-iam-oidc-provider --region $RegionName --cluster $ClusterName --approve
+
+    # Create AWSLoadBalancerControllerIAMPolicy IAM Policy
+    [string] $iamPolicyName = "AWSLoadBalancerControllerIAMPolicy"
+    curl -o iam-policy.json https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/main/docs/install/iam_policy.json
+    aws iam create-policy --policy-name $iamPolicyName --policy-document file://iam-policy.json
+
+    # Create K8s Service Account for the ingress controller
+    [string] $awsAccount = (Get-STSCallerIdentity).Account
+    [string] $AlbPolicyArn = "arn:aws:iam::$($awsAccount):policy/$iamPolicyName"
+    [string] $albControllersvcAccountName = "aws-load-balancer-controller"
+
+    eksctl create iamserviceaccount `
+        --region $RegionName `
+        --name $albControllersvcAccountName `
+        --namespace kube-system `
+        --cluster $ClusterName `
+        --attach-policy-arn $AlbPolicyArn `
+        --override-existing-serviceaccounts `
+        --approve
+
+    # Install the TargetGroupBinding CRD
+    kubectl apply -k github.com/aws/eks-charts/stable/aws-load-balancer-controller//crds?ref=master
+
+    helm repo add eks https://aws.github.io/eks-charts
+    
+    helm upgrade -i -n kube-system aws-load-balancer-controller eks/aws-load-balancer-controller `
+    --set clusterName=$ClusterName `
     --set vpcId=$($eksCluster.ResourcesVpcConfig.VpcId) `
-    --set region=$RegionName
-
-# Output pending Pods
-kubectl get pods -n kube-system
+    --set region=$RegionName `
+    --set serviceAccount.create=false `
+    --set serviceAccount.name=$albControllersvcAccountName
+        
+    # Output pending Pods
+    kubectl get pods -n kube-system
+}
+finally {
+    Pop-Location
+}
