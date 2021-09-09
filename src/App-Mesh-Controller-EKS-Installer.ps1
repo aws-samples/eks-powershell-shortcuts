@@ -49,9 +49,6 @@ if(!$eksCluster) {
 # Set current kubectl context
 aws eks --region $RegionName update-kubeconfig --name $ClusterName --alias $RegionName/$ClusterName
 
-# Install the App Mesh Kubernetes custom resource definitions (CRD).
-kubectl apply -k "https://github.com/aws/eks-charts/stable/appmesh-controller/crds?ref=master"
-
 # Create a Kubernetes namespace for the controller.
 $appMeshNamespace = "appmesh-system"
 kubectl create ns $appMeshNamespace

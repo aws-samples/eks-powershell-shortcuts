@@ -55,7 +55,7 @@ try {
     aws iam create-policy --policy-name $iamPolicyName --policy-document file://iam-policy.json
 
     # Create K8s Service Account for the ingress controller
-    [string] $awsAccount = (Get-STSCallerIdentity).Account
+    [string] $awsAccount = aws sts get-caller-identity --query Account --output text
     [string] $AlbPolicyArn = "arn:aws:iam::$($awsAccount):policy/$iamPolicyName"
     [string] $albControllersvcAccountName = "aws-load-balancer-controller"
 
