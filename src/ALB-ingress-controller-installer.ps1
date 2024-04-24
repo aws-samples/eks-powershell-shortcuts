@@ -69,7 +69,7 @@ try {
         --approve
 
     # Install the TargetGroupBinding CRD
-    kubectl apply -k github.com/aws/eks-charts/stable/aws-load-balancer-controller//crds?ref=master
+    kubectl apply -k github.com/aws/eks-charts/stable/aws-load-balancer-controller/crds?ref=master
 
     helm repo add eks https://aws.github.io/eks-charts
     
